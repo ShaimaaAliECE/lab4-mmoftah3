@@ -160,7 +160,8 @@ function check() {
   } else {
     var xReq = new XMLHttpRequest();
     xReq.onreadystatechange = displayGrade;
-    xReq.open("GET", "/check?arrayOfOptions=" + choiceArray, true);
+    //send the user choices to the server as arrayOfChoices
+    xReq.open("GET", "/checkQuiz?arrayOfChoices=" + choiceArray, true);
     xReq.send();
   }
 }

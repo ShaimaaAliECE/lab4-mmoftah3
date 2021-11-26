@@ -1,11 +1,8 @@
 const express = require("express");
-var questionlist = require("./questions.json");
+//to get the objects inside teh JSON file and store them in questionlist
+let questionlist = require("./questions.json");
 
 const app = express();
-
-app.get("/", (req, res) => {
-  res.redirect("/index.html");
-});
 
 app.get("/questions", (req, res) => {
   res.json(questionlist);
@@ -24,8 +21,9 @@ app.get("/answers", (req, res) => {
   }
 });
 
-app.get("/check", (req, res) => {
-  let selections = req.query.arrayOfOptions.toString().split(",");
+//method to show the user's score after it receives it's answers from the client
+app.get("/checkQuiz", (req, res) => {
+  let selections = req.query.arrayOfChoices.toString().split(",");
   let scoreCount = 0;
   let solutions = [];
   for (let i = 0; i < questionlist.length; i++) {
@@ -33,13 +31,12 @@ app.get("/check", (req, res) => {
   }
 
   for (let i = 0; i < 5; i++) {
-    // compares the chosen index to the answer index for all questions
     if (selections[i] == solutions[i]) {
-      scoreCount += 1; // if the correct answer is selected, increase the score
+      scoreCount += 1;
     }
   }
 
-  res.send("You got a score of " + scoreCount.toString() + "/5");
+  res.send("Your score is:  " + scoreCount.toString() + "/5");
 });
 
 app.use(express.static("static"));
