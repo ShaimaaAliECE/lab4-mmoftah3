@@ -57,6 +57,8 @@
   </body>
 
   <script>
+
+    
     //getting the questions
 function getQuestions() {
   //create the XMLobject 
@@ -71,6 +73,7 @@ function getQuestions() {
 
 //function to display the questions to the client and send them to the server 
 function displayQuestions() {
+
 
     if (this.readyState == 4 && this.status == 200) {
       //select the question div
@@ -110,7 +113,7 @@ function displayQuestions() {
                             `
             
           }
-            content += `<p id="answerCol${i}" ></p>`
+            content += `<p id="correction${i}" ></p>`
         }
         
         content += `</div><button id='submit' onclick='check()'>Submit Quiz</button></form></div>`;
@@ -133,9 +136,12 @@ function submitAnswer(choice) {
 
 //check if the user's selected answer is correct or wrong 
 function isCorrect(xReq, Answer) {
-  let area = document.getElementById("answerCol" + Answer.id);
+  //get the correction paragraph to make it show the answer
+  //indicates if correct or wong
+  let response = document.getElementById("correction" + Answer.id);
   if (xReq.readyState == 4 && xReq.status == 200) {
-    area.innerHTML = xReq.responseText;
+
+    response.innerHTML = xReq.responseText;
   }
 }
 
@@ -153,22 +159,27 @@ function check() {
       choiceArray.push(userOption.item(o).value);
     }
   }
+  //print the choices 
   console.log(choiceArray);
   //if the user does not answer all 5 questions
   if (choiceArray.length < 4) {
     alert("You must answer all the questions to check your score");
   } else {
     var xReq = new XMLHttpRequest();
-    xReq.onreadystatechange = displayGrade;
+    xReq.onreadystatechange = displayScore;
     //send the user choices to the server as arrayOfChoices
     xReq.open("GET", "/checkQuiz?arrayOfChoices=" + choiceArray, true);
     xReq.send();
   }
 }
 
-function displayGrade() {
+//get the score from the server 
+function displayScore() {
+
+  // grab the score div from the html 
   let totalScore = document.getElementById("score");
 
+  //send to it the response text received from the server 
   totalScore.innerHTML = this.responseText;
 }
 

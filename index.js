@@ -3,6 +3,8 @@ const express = require("express");
 let questionlist = require("./questions.json");
 
 const app = express();
+//using the staic folder
+app.use(express.static("static"));
 
 app.get("/questions", (req, res) => {
   res.json(questionlist);
@@ -23,22 +25,29 @@ app.get("/answers", (req, res) => {
 
 //method to show the user's score after it receives it's answers from the client
 app.get("/checkQuiz", (req, res) => {
-  let selections = req.query.arrayOfChoices.toString().split(",");
-  let scoreCount = 0;
-  let solutions = [];
+  //user selection when they click on the radio button
+  let userSelection = req.query.arrayOfChoices.toString().split(",");
+  //score counter
+  let score = 0;
+  //array of answers
+  let answers = [];
+
   for (let i = 0; i < questionlist.length; i++) {
-    solutions.push(questionlist[i].answerIndex);
+    //push the solutions into the answers array
+    answers.push(questionlist[i].answerIndex);
   }
 
   for (let i = 0; i < 5; i++) {
-    if (selections[i] == solutions[i]) {
-      scoreCount += 1;
+    // if the user choice matches the answer
+    if (userSelection[i] == answers[i]) {
+      //increase the score by 1
+      score += 1;
     }
   }
 
-  res.send("Your score is:  " + scoreCount.toString() + "/5");
+  //display the user's score
+  res.send("Your score is:  " + score.toString() + "/5");
 });
 
-app.use(express.static("static"));
-
+//listen at port 80
 app.listen(80);
