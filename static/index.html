@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <style>
+
+      h1 {
+         text-align: center;
+        color: #790d4f;
+        font-size: 60px;
+
+      }
+      a{
+       
+        color: #e6299d;
+        font-size: 30px;
+      }
+
+      body 
+      {
+        background-color: rgb(183, 224, 210);
+      }
+
+      #questions
+      {
+      
+       font-size: 25px;
+       color: #050504;
+ 
+      }
+
+      #score
+      {
+        font-size: 25px;
+        color: #b9134a;
+        text-align: center;
+      }
+    </style>
+    <title>Quiz Application</title>
+  </head>
+
+  <body>
+    <h1>Quiz Time!</h1>
+   
+      <a href="javascript:getQuestions()">Click here to start the quiz!</a>
+    </br>
+    </br>
+    </br>
+    
+    </div>
+    <div id="questions"></div> 
+  </br>
+    <div id="score"></div>
+  </body>
+
+  <script>
+    //getting the questions
+function getQuestions() {
+  //create the XMLobject 
+  let xReq = new XMLHttpRequest();
+  //display the questions
+  xReq.onreadystatechange = displayQuestions;
+  //getting the questions from the server 
+  xReq.open("GET", "/questions", true);
+  xReq.send();
+}
+
+
+//function to display the questions to the client and send them to the server 
+function displayQuestions() {
+
+    if (this.readyState == 4 && this.status == 200) {
+      //select the question div
+        let questionDiv = document.getElementById('questions');
+        //aray of the json file components 
+        let questionlist = JSON.parse(this.responseText);
+        let content = '';
+        content += `<div class='quiz'> `
+
+          //loop through the JSON file components 
+        for (let i = 0; i < questionlist.length; i++) {
+          //display the questions 
+            content +=  questionlist[i].stem + `</br> </br>`
+
+            //if the question has only two choices 
+            if (questionlist[i].options.length == 2) {
+              //creating the radio buttons and when  you cick on them it sends the value to the server
+                content += `
+                            <input type='radio' class='choice' id="${i}"  name="${i}" value='0' onclick='submitAnswer(this)'/>
+                            <label for="i0">` + questionlist[i].options[0] + `</label></br>
+                            <input type='radio' class='choice' id="${i}" name="${i}" value="1" onclick='submitAnswer(this)'/>
+                            <label for="i1">` + questionlist[i].options[1] + `</label><br>
+                            `
+            }
+            if (questionlist[i].options.length == 4) {
+              //give them all the same name so that the user can select only one radio button per question
+              
+                content += `
+                            <input type='radio' class='choice'  id="${i}"  name="${i}" value="0" onclick='submitAnswer(this)'></input>
+                            <label for="i0">` + questionlist[i].options[0] + `</label> </br>
+                            <input type='radio' class='choice' id="${i}"  name="${i}" value="1" onclick='submitAnswer(this)'></input>
+                            <label for="i1">` + questionlist[i].options[1] + `</label></br>
+                            <input type='radio' class='choice' id="${i}"  name="${i}" value="2" onclick='submitAnswer(this)'></input>
+                            <label for="i2">` + questionlist[i].options[2] + `</label></br>
+                            <input type='radio' class='choice' id="${i}"  name="${i}" value="3" onclick='submitAnswer(this)'></input>
+                            <label for="i3">` + questionlist[i].options[3] + `</label><br>
+                            `
+            
+          }
+            content += `<p id="answerCol${i}" ></p>`
+        }
+        
+        content += `</div><button id='submit' onclick='check()'>Submit Quiz</button></form></div>`;
+
+        questionDiv.innerHTML = content;
+    }
+}
+
+//send the radio button value clicked on by the user to the server 
+function submitAnswer(choice) {
+    let xReq = new XMLHttpRequest();
+    //send the values to isCorrect() t omake sure that it is the correct answer
+    xReq.onreadystatechange = function () 
+    {
+       isCorrect(xReq, choice); 
+      }
+    xReq.open('GET', '/answers?choiceValue=' + choice.value + '&&Answer=' + choice.id, true);
+    xReq.send();
+}
+
+//check if the user's selected answer is correct or wrong 
+function isCorrect(xReq, Answer) {
+  let area = document.getElementById("answerCol" + Answer.id);
+  if (xReq.readyState == 4 && xReq.status == 200) {
+    area.innerHTML = xReq.responseText;
+  }
+}
+
+//method to check the answers when the sure clicks on the submit button 
+function check() {
+  //get the options that the user has seleted
+  let userOption = document.getElementsByClassName("choice");
+  //array to store the user choices 
+  let choiceArray = [];
+
+  //loop through user option
+  for (let o = 0; o < userOption.length; o++) {
+    if (userOption.item(o).checked) {
+      //push the selected choice
+      choiceArray.push(userOption.item(o).value);
+    }
+  }
+  console.log(choiceArray);
+  //if the user does not answer all 5 questions
+  if (choiceArray.length < 4) {
+    alert("You must answer all the questions to check your score");
+  } else {
+    var xReq = new XMLHttpRequest();
+    xReq.onreadystatechange = displayGrade;
+    xReq.open("GET", "/check?arrayOfOptions=" + choiceArray, true);
+    xReq.send();
+  }
+}
+
+function displayGrade() {
+  let totalScore = document.getElementById("score");
+
+  totalScore.innerHTML = this.responseText;
+}
+
+  </script>
+</html>
